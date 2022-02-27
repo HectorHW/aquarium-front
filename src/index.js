@@ -150,6 +150,20 @@ class SpawnMenu extends React.Component {
     }
 }
 
+class PauseButton extends React.Component {
+    render() {
+        return <button onClick={
+            () => {
+
+                fetch(`${address}/pause`, {
+                    method: "POST",
+                });
+
+            }
+        }>Pause</button>
+    }
+}
+
 class Controls extends React.Component {
     render() {
         return <div style={
@@ -159,6 +173,7 @@ class Controls extends React.Component {
         }>
             <AutoButton />
             <SpawnMenu />
+            <PauseButton />
         </div>
     }
 }
@@ -186,21 +201,21 @@ var shouldTick = true;
 
 function tick() {
 
-    if (shouldTick) {
-        fetch(`${address}/tick`, { method: "POST" });
+    function draw_world(response) {
+        response.then(response => response.json()).then(
+            data => {
+                ReactDOM.render(
+                    <Application data={data} />,
+                    document.getElementById('root')
+                );
+            });
     }
 
-
-    fetch(`${address}/world`)
-        .then(response => {
-            return response.json();
-        })
-        .then(data => {
-            ReactDOM.render(
-                <Application data={data} />,
-                document.getElementById('root')
-            );
-        });
+    if (shouldTick) {
+        draw_world(fetch(`${address}/tick`, { method: "POST" }));
+    } else {
+        draw_world(fetch(`${address}/world`));
+    }
 
     if (shouldTick) {
         requestAnimationFrame(tick)
