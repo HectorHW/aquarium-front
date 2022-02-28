@@ -34,27 +34,20 @@ class EmptyCell extends React.Component {
     }
 }
 
+
+function heatMapColorforValue(value) {
+    value = Math.max(0, Math.min(value, 1));
+    let h = (1.0 - value) * 240;
+    return "hsl(" + h + ", 100%, 50%)";
+}
+
 class Organism extends React.Component {
     render() {
 
-        function compute_transition(value1, value2, factor) {
-            return value1 * factor + value2 * (1 - factor);
-        }
-
-
-
         let factor = this.props.data.energy / 400;
 
-        let base = [72, 72, 72];
-        let orange = [255, 240, 17];
-
-        let color = [
-            compute_transition(orange[0], base[0], factor),
-            compute_transition(orange[1], base[1], factor),
-            compute_transition(orange[2], base[2], factor)];
-
         let cell_style = {
-            "backgroundColor": `rgb(${color[0]},${color[1]},${color[2]} )`,
+            "backgroundColor": heatMapColorforValue(factor),
         }
 
         //{this.props.data.energy},{this.props.data.minerals}
