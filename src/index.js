@@ -44,7 +44,7 @@ function heatMapColorforValue(value) {
 class Organism extends React.Component {
     render() {
 
-        let factor = this.props.data.energy / 400;
+        let factor = this.props.data.energy / 500;
 
         let cell_style = {
             "backgroundColor": heatMapColorforValue(factor),
