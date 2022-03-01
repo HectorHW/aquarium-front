@@ -96,22 +96,28 @@ class Map extends React.Component {
 
 class AutoButton extends React.Component {
     render() {
+
+        let button_text = is_sync ? "Synced" : "Unsynced";
+
         return <button onClick={
             () => {
-
+                is_sync = !is_sync;
                 fetch(`${address}/stats`)
                     .then(response => response.json())
                     .then(stats => {
-                        if (stats.is_paused == "0") {
-                            shouldTick = true;
-                        } else {
-                            shouldTick = false;
-                        }
 
-                        fetch(`${address}/pause`, { method: "POST" })
+                        if (is_sync) {
+                            if (stats.is_paused == "0") {
+                                fetch(`${address}/pause`, { method: "POST" });
+                            }
+                        } else {
+                            if (is_paused != (stats.is_paused == "1")) {
+                                fetch(`${address}/pause`, { method: "POST" });
+                            }
+                        }
                     })
             }
-        }>Sync/Unsync</button>
+        }> {button_text} </button>
     }
 }
 
@@ -145,15 +151,41 @@ class SpawnMenu extends React.Component {
 
 class PauseButton extends React.Component {
     render() {
+
+        let button_text;
+        if (is_paused) {
+            button_text = "Paused";
+        } else {
+            button_text = "Unpaused";
+        }
+
         return <button onClick={
             () => {
+                if (is_sync) {
+                    is_paused = !is_paused;
+                } else {
+                    fetch(`${address}/pause`, {
+                        method: "POST",
+                    }).then((response) => {
+                        is_paused = response.headers.get('pause-state') === "1";
+                    });
+                }
 
-                fetch(`${address}/pause`, {
-                    method: "POST",
-                });
 
             }
-        }>Pause</button>
+        }>{button_text}</button>
+    }
+}
+
+class ResetButton extends React.Component {
+    render() {
+        return <button onClick={
+            () => {
+                fetch(`${address}/reset`, {
+                    "method": "POST"
+                })
+            }
+        }>Reset</button>
     }
 }
 
@@ -167,6 +199,7 @@ class Controls extends React.Component {
             <AutoButton />
             <SpawnMenu />
             <PauseButton />
+            <ResetButton />
         </div>
     }
 }
@@ -188,9 +221,8 @@ class Application extends React.Component {
     }
 }
 
-
-
-var shouldTick = true;
+var is_sync = false;
+var is_paused = false;
 
 function tick() {
 
@@ -204,18 +236,13 @@ function tick() {
             });
     }
 
-    if (shouldTick) {
+    if (is_sync && !is_paused) {
         draw_world(fetch(`${address}/tick`, { method: "POST" }));
-    } else {
-        draw_world(fetch(`${address}/world`));
-    }
-
-    if (shouldTick) {
         requestAnimationFrame(tick)
     } else {
+        draw_world(fetch(`${address}/world`));
         setTimeout(() => requestAnimationFrame(tick), 500)
     }
-
 }
 
 fetch(`${address}/stats`)
@@ -223,7 +250,9 @@ fetch(`${address}/stats`)
     .then(
         stats => {
             if (stats.is_paused == "0") {
-                fetch(`${address}/pause`, { method: "POST" })
+                is_paused = false;
+            } else {
+                is_paused = true;
             }
         }
     );
