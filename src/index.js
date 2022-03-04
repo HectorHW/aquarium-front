@@ -249,6 +249,23 @@ class LoadButton extends React.Component {
     }
 }
 
+class SaveButton extends React.Component {
+    render() {
+        return <button
+            className='title-button'
+            onClick={() => {
+                fetch(`${address}/save-world`).then(content => content.json()).then(data => {
+                    let a = document.createElement("a");
+                    a.href = window.URL.createObjectURL(new Blob([JSON.stringify(data)]), { type: "text/plain" });
+                    a.download = "world.json";
+                    a.click();
+                })
+
+            }}
+        >Save</button>
+    }
+}
+
 class Header extends React.Component {
     render() {
         return <div className='top-panel'>
@@ -258,6 +275,7 @@ class Header extends React.Component {
 
             <ResetButton />
             <LoadButton />
+            <SaveButton />
         </div>
     }
 }
