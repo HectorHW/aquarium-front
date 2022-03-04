@@ -84,7 +84,7 @@ class Map extends React.Component {
             });
 
 
-        let table = <table key="map">
+        let table = <table key="map" className="field-table">
             <tbody>
                 {rows}
             </tbody>
@@ -99,25 +99,26 @@ class AutoButton extends React.Component {
 
         let button_text = is_sync ? "Synced" : "Unsynced";
 
-        return <button onClick={
-            () => {
-                is_sync = !is_sync;
-                fetch(`${address}/stats`)
-                    .then(response => response.json())
-                    .then(stats => {
+        return <button className="title-button"
+            onClick={
+                () => {
+                    is_sync = !is_sync;
+                    fetch(`${address}/stats`)
+                        .then(response => response.json())
+                        .then(stats => {
 
-                        if (is_sync) {
-                            if (stats.is_paused == "0") {
-                                fetch(`${address}/pause`, { method: "POST" });
+                            if (is_sync) {
+                                if (stats.is_paused == "0") {
+                                    fetch(`${address}/pause`, { method: "POST" });
+                                }
+                            } else {
+                                if (is_paused != (stats.is_paused == "1")) {
+                                    fetch(`${address}/pause`, { method: "POST" });
+                                }
                             }
-                        } else {
-                            if (is_paused != (stats.is_paused == "1")) {
-                                fetch(`${address}/pause`, { method: "POST" });
-                            }
-                        }
-                    })
-            }
-        }> {button_text} </button>
+                        })
+                }
+            }> {button_text} </button>
     }
 }
 
@@ -159,33 +160,35 @@ class PauseButton extends React.Component {
             button_text = "Unpaused";
         }
 
-        return <button onClick={
-            () => {
-                if (is_sync) {
-                    is_paused = !is_paused;
-                } else {
-                    fetch(`${address}/pause`, {
-                        method: "POST",
-                    }).then((response) => {
-                        is_paused = response.headers.get('pause-state') === "1";
-                    });
+        return <button className="title-button"
+            onClick={
+                () => {
+                    if (is_sync) {
+                        is_paused = !is_paused;
+                    } else {
+                        fetch(`${address}/pause`, {
+                            method: "POST",
+                        }).then((response) => {
+                            is_paused = response.headers.get('pause-state') === "1";
+                        });
+                    }
+
+
                 }
-
-
-            }
-        }>{button_text}</button>
+            }>{button_text}</button>
     }
 }
 
 class ResetButton extends React.Component {
     render() {
-        return <button onClick={
-            () => {
-                fetch(`${address}/reset`, {
-                    "method": "POST"
-                })
-            }
-        }>Reset</button>
+        return <button className="title-button"
+            onClick={
+                () => {
+                    fetch(`${address}/reset`, {
+                        "method": "POST"
+                    })
+                }
+            }>Reset</button>
     }
 }
 
@@ -238,23 +241,21 @@ class LoadButton extends React.Component {
                 ref={this.state.inputOpenFileRef}
                 style={{ display: 'none' }}
             />
-            <button onClick={
-                this.showOpenFileDialog
-            }>Load</button>
+            <button className="title-button"
+                onClick={
+                    this.showOpenFileDialog
+                }>Load</button>
         </div>
     }
 }
 
-class Controls extends React.Component {
+class Header extends React.Component {
     render() {
-        return <div style={
-            {
-                flexGrow: 1
-            }
-        }>
+        return <div className='top-panel'>
             <AutoButton />
-            <SpawnMenu />
             <PauseButton />
+            <SpawnMenu />
+
             <ResetButton />
             <LoadButton />
         </div>
@@ -265,13 +266,10 @@ class Application extends React.Component {
 
     render() {
         return (
-            <div style={
-                {
-                    display: "flex"
-                }
-            }>
+            <div>
+                <Header />
                 <Map cells={this.props.data.cells} />
-                <Controls />
+
             </div>
 
         );
