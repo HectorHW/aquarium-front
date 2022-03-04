@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
@@ -189,6 +189,62 @@ class ResetButton extends React.Component {
     }
 }
 
+
+class LoadButton extends React.Component {
+
+    constructor(props) {
+        super(props);
+        let reader = new FileReader();
+
+        function upload_file(e) {
+            let content = reader.result;
+
+            fetch(`${address}/load-world`,
+                {
+                    method: "POST",
+                    body: content,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                }).catch(e => console.error("failed upload:", e))
+        }
+
+        reader.onloadend = upload_file;
+
+        this.state = { reader: reader, inputOpenFileRef: React.createRef() };
+    }
+
+    showOpenFileDialog = () => {
+        this.state.inputOpenFileRef.current.click()
+    }
+
+
+    render() {
+        return <div>
+            <input
+                type="file"
+                id="file"
+                onChange={
+                    (event) => {
+                        let file = event.target.files[0];
+                        if (!file) {
+                            return;
+                        }
+
+                        this.state.reader.readAsText(file);
+                        event.target.value = null;
+                    }
+                }
+                ref={this.state.inputOpenFileRef}
+                style={{ display: 'none' }}
+            />
+            <button onClick={
+                this.showOpenFileDialog
+            }>Load</button>
+        </div>
+    }
+}
+
 class Controls extends React.Component {
     render() {
         return <div style={
@@ -200,6 +256,7 @@ class Controls extends React.Component {
             <SpawnMenu />
             <PauseButton />
             <ResetButton />
+            <LoadButton />
         </div>
     }
 }
