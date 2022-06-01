@@ -137,12 +137,13 @@ class SpawnMenu extends React.Component {
                     })
                 }}>Spawn green</a>
                 <a onClick={() => {
+                    let amount = prompt("amount", "20");
                     fetch(`${address}/spawn-random`, {
                         method: "POST",
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: "20"
+                        body: amount
                     })
                 }}>Spawn random</a>
             </div>
